@@ -1,4 +1,4 @@
-package com.acmecorp.xtendm3extensions
+package ch.schaublin.xtendm3extensions
 
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
