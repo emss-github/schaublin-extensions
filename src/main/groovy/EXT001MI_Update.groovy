@@ -6,6 +6,7 @@
  * Description: Update a record from table MCWCCO
  * Date       Changed By            Description
  * 20240902   Eric Masson           Creation of transaction Update
+ * 20241007   Eric Masson           Post review fixes
  */
  
  public class Update extends ExtendM3Transaction {
@@ -37,11 +38,15 @@
     cono = (Integer) program.getLDAZD().CONO
     chid = program.getUser()
   
+    // Check FRDT
+    if (!utility.call("DateUtil","isDateValid", mi.inData.get("FRDT", "yyyyMMdd"))) {
+      mi.error("From date " + mi.inData.get("FRDT").trim() + " is invalid")
+      return
+    }
+    
     // Select fields to handle from table MCWCCO
     DBAction query = database.table("MCWCCO")
     .index("00")
-      .selection("KECONO", "KEFACI", "KECCOM", "KEPCTP", "KEOBV1", "KEOBV2", "KEOBV3", "KEFRDT",
-                  "KECDPR", "KERGDT", "KERGTM", "KELMDT", "KECHNO", "KECHID")
     .build()
     DBContainer container = query.getContainer()
     // Set the key fields of the record to delete
@@ -54,7 +59,7 @@
     container.set("KEOBV1", mi.inData.get("OBV1").trim())
     container.set("KEOBV2", obv2)
     container.set("KEOBV3", obv3)
-    container.set("KEFRDT", utility.call("NumberUtil","parseStringToInteger", mi.inData.get("FRDT")))
+    container.set("KEFRDT", utility.call("DateUtil","dateY8AsInt", mi.inData.get("FRDT")))
      
     Closure<Boolean> updateCallBack = { LockedResult lockedResult ->
       checkDoubleEmptyField("KECDPR", mi.inData.get("CDPR"), lockedResult)
@@ -69,9 +74,7 @@
     }
     
     // If there is an existing record of this key, the fields are set and the record is updated in the table
-    if (query.read(container)) {
-      query.readAllLock(container, 8, updateCallBack)
-    } else {
+    if (!query.readLock(container, updateCallBack)) {
       // If the record doesn't already exist in the table, an error is thrown
       mi.error("Record not found")
     }

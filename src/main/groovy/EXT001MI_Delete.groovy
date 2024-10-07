@@ -6,6 +6,7 @@
  * Description: Delete a record from table MCWCCO
  * Date       Changed By            Description
  * 20240902   Eric Masson           Creation of transaction Delete
+ * 20241007   Eric Masson           Post review fixes
  */
  
  public class Delete extends ExtendM3Transaction {
@@ -32,11 +33,16 @@
   
   public void main() {
     cono = (Integer) program.getLDAZD().CONO
-    
+
+    // Check FRDT
+    if (!utility.call("DateUtil","isDateValid", mi.inData.get("FRDT", "yyyyMMdd"))) {
+      mi.error("From date " + mi.inData.get("FRDT").trim() + " is invalid")
+      return
+    }
+
     // Select fields to handle from table MCWCCO
     DBAction query = database.table("MCWCCO")
     .index("00")
-      .selection("KECONO", "KEFACI", "KECCOM", "KEPCTP", "KEOBV1", "KEOBV2", "KEOBV3", "KEFRDT")
     .build()
     DBContainer container = query.getContainer()
     // Set the key fields of the record to delete
@@ -49,16 +55,15 @@
     container.set("KEOBV1", mi.inData.get("OBV1").trim())
     container.set("KEOBV2", obv2)
     container.set("KEOBV3", obv3)
-    container.set("KEFRDT", utility.call("NumberUtil","parseStringToInteger", mi.inData.get("FRDT")))
+    container.set("KEFRDT", utility.call("DateUtil","dateY8AsInt", mi.inData.get("FRDT")))
  
     Closure<Boolean> deleterCallback = { LockedResult lockedResult ->
       lockedResult.delete()
     }
+    
     // If there is an existing record of this key, it is deleted
-    if (query.read(container)) {
-      query.readLock(container, deleterCallback)
-    } else {
-    // If there is no existing record of this key, an error is thrown
+    if (!query.readLock(container, deleterCallback)) {
+      // If there is no existing record of this key, an error is thrown
       mi.error("Record not found")
     }
   }

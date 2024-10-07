@@ -6,6 +6,7 @@
  * Description: Add a record in table MCWCCO
  * Date       Changed By            Description
  * 20240902   Eric Masson           Creation of transaction Add
+ * 20241007   Eric Masson           Post review fixes
  */
  
 public class Add extends ExtendM3Transaction {
@@ -38,26 +39,32 @@ public class Add extends ExtendM3Transaction {
     chid = program.getUser()
     
     // Check FACI
-    if (!CheckFACIExists(mi.inData.get("FACI").trim())) {
+    if (!checkFACIExists(mi.inData.get("FACI").trim())) {
       mi.error("Facility " + mi.inData.get("FACI").trim() + " does not exist")
       return
     }
     
     // Check CCOM MCCOMP
-    if (!CheckCCOMExists(mi.inData.get("CCOM").trim())) {
+    if (!checkCCOMExists(mi.inData.get("CCOM").trim())) {
       mi.error("Costing component " + mi.inData.get("CCOM").trim() + " does not exist")
       return
     }
     
     // Check PCTP PCS005MI/Get 
-    if (!CheckPCTPExists(mi.inData.get("PCTP").trim())) {
+    if (!checkPCTPExists(mi.inData.get("PCTP").trim())) {
       mi.error("Costing type " + mi.inData.get("PCTP").trim() + " does not exist")
       return
     }
     
     // Check OBV1 PDS010MI/Get 
-    if (!CheckPLGRExists(mi.inData.get("FACI").trim(), mi.inData.get("OBV1").trim())) {
+    if (!checkPLGRExists(mi.inData.get("FACI").trim(), mi.inData.get("OBV1").trim())) {
       mi.error("Work center " + mi.inData.get("OBV1").trim() + " does not exist")
+      return
+    }
+    
+    // Check FRDT
+    if (!utility.call("DateUtil","isDateValid", mi.inData.get("FRDT", "yyyyMMdd"))) {
+      mi.error("From date " + mi.inData.get("FRDT").trim() + " is invalid")
       return
     }
     
@@ -79,7 +86,7 @@ public class Add extends ExtendM3Transaction {
     container.set("KEOBV1", mi.inData.get("OBV1").trim())
     container.set("KEOBV2", obv2)
     container.set("KEOBV3", obv3)
-    container.set("KEFRDT", utility.call("NumberUtil","parseStringToInteger", mi.inData.get("FRDT")))
+    container.set("KEFRDT", utility.call("DateUtil","dateY8AsInt", mi.inData.get("FRDT")))
     
     // If there is no existing record of this key, the other fields are set and the record is inserted in the table
     if (!query.read(container)) {
@@ -99,9 +106,9 @@ public class Add extends ExtendM3Transaction {
   }
   
   /**
-   * CheckFACIExists - Database access to CFACIL as CRS008MI/Get fails
+   * checkFACIExists - Database access to CFACIL as CRS008MI/Get fails
    */
-  private boolean CheckFACIExists(String FACI) {
+  private boolean checkFACIExists(String FACI) {
     DBAction CFACIL = database.table("CFACIL").index("00").selection("CFCONO", "CFFACI", "CFFACN", "CFDIVI", "CFWHLO").build()
     DBContainer container = CFACIL.getContainer()
     container.set("CFCONO", cono)
@@ -110,9 +117,9 @@ public class Add extends ExtendM3Transaction {
   }
 
   /**
-   * CheckCCOMExists - Database access to MCCOMP as PDS010MI/Get fails
+   * checkCCOMExists - Database access to MCCOMP as PDS010MI/Get fails
    */
-  private boolean CheckCCOMExists(String CCOM) {
+  private boolean checkCCOMExists(String CCOM) {
     DBAction MCCOMP = database.table("MCCOMP").index("00").selection("KCCONO", "KCCCOM", "KCTX40").build()
     DBContainer container = MCCOMP.getContainer()
     container.set("KCCONO", cono)
@@ -121,9 +128,9 @@ public class Add extends ExtendM3Transaction {
   }
 
   /**
-   * CheckPCTPExists - Database access to MCCOTY as PCS005MI/Get fails
+   * checkPCTPExists - Database access to MCCOTY as PCS005MI/Get fails
    */
-  private boolean CheckPCTPExists(String PCTP) {
+  private boolean checkPCTPExists(String PCTP) {
     DBAction MCCOTY = database.table("MCCOTY").index("00").selection("KBCONO", "KBPCTP", "KBTX40").build()
     DBContainer container = MCCOTY.getContainer()
     container.set("KBCONO", cono)
@@ -132,9 +139,9 @@ public class Add extends ExtendM3Transaction {
   }
 
   /**
-   * CheckPLGRExists - Calls PDS010MI/Get to check whether work center exists
+   * checkPLGRExists - Calls PDS010MI/Get to check whether work center exists
    */
-  private boolean CheckPLGRExists(String FACI, String PLGR) {
+  private boolean checkPLGRExists(String FACI, String PLGR) {
     DBAction MPDWCT = database.table("MPDWCT").index("00").selection("PPCONO", "PPFACI", "PPPLGR", "PPPLNM").build()
     DBContainer container = MPDWCT.getContainer()
     container.set("PPCONO", cono)
