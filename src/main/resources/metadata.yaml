@@ -1,21 +1,51 @@
 metadataVersion: 1
-extensions:
-  - name: CustomerCreditCheckP1
-    triggers:
-      - type: METHOD
-        program: CRS610
-        programType: INTERACTIVE
-        method: PJINZ
-        advice: PRE
-    priority: 500
-    utilities:
-  - name: CustomerCreditCheckP2
-    triggers:
-      - type: METHOD
-        program: CRS610
-        programType: INTERACTIVE
-        method: PJINZ
-        advice: POST
-    priority: 500
-    utilities:
-
+apis:
+  - name: EXT001MI
+    transactions:
+      - name: Add
+        description: Add a record in table MCWCCO
+        type: SINGLE
+        inputs:
+          - name: FACI
+            description: facility
+            length: 3
+            type: TEXT
+            mandatory: true
+          - name: CCOM
+            description: costing component
+            length: 6
+            type: TEXT
+            mandatory: true
+          - name: PCTP
+            description: costing type
+            length: 1
+            type: TEXT
+            mandatory: true
+          - name: OBV1
+            description: start value 1
+            length: 15
+            type: TEXT
+            mandatory: true
+          - name: OBV2
+            description: start value 2
+            length: 15
+            type: TEXT
+            mandatory: false
+          - name: OBV3
+            description: start value 3
+            length: 15
+            type: TEXT
+            mandatory: false
+          - name: FRDT
+            description: from date
+            length: 8
+            type: NUMERIC
+            mandatory: true
+          - name: CDPR
+            description: cost rate
+            length: 17
+            type: NUMERIC
+            mandatory: true
+utilities:
+  - name: NumberUtil
+  - name: DateUtil
