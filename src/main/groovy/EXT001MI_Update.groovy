@@ -7,6 +7,7 @@
  * Date       Changed By            Description
  * 20240902   Eric Masson           Creation of transaction Update
  * 20241007   Eric Masson           Post review fixes
+ * 20241029   Eric Masson           Fix DateUtil/isDateValid invocation
  */
  
  public class Update extends ExtendM3Transaction {
@@ -39,7 +40,7 @@
     chid = program.getUser()
   
     // Check FRDT
-    if (!utility.call("DateUtil","isDateValid", mi.inData.get("FRDT", "yyyyMMdd"))) {
+    if (!utility.call("DateUtil","isDateValid", mi.inData.get("FRDT"), "yyyyMMdd")) {
       mi.error("From date " + mi.inData.get("FRDT").trim() + " is invalid")
       return
     }
