@@ -17,14 +17,14 @@ jobs:
         run: mvn -B xtendm3:lint --file pom.xml
       - name: Export XtendM3 Extensions
         run: mvn -B xtendm3:export --file pom.xml
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         name: Upload exported extensions
         if: ${{ success() }}
         with:
           name: exported-extension
           path: target/exported.zip
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
