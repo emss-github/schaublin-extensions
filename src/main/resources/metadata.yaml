@@ -9,32 +9,32 @@ apis:
           - name: FACI
             description: facility
             length: 3
-            type: TEXT
+            type: ALPHANUMERIC
             mandatory: true
           - name: CCOM
             description: costing component
             length: 6
-            type: TEXT
+            type: ALPHANUMERIC
             mandatory: true
           - name: PCTP
             description: costing type
             length: 1
-            type: TEXT
+            type: ALPHANUMERIC
             mandatory: true
           - name: OBV1
             description: start value 1
             length: 15
-            type: TEXT
+            type: ALPHANUMERIC
             mandatory: true
           - name: OBV2
             description: start value 2
             length: 15
-            type: TEXT
+            type: ALPHANUMERIC
             mandatory: false
           - name: OBV3
             description: start value 3
             length: 15
-            type: TEXT
+            type: ALPHANUMERIC
             mandatory: false
           - name: FRDT
             description: from date
